@@ -13,7 +13,8 @@
 #import "FSCalendarConstants.h"
 
 @interface FSCalendarCell ()
-
+//오늘 날짜 dot label color
+@property (readonly, nonatomic) UIColor *colorForTodayDotLabel;
 @property (readonly, nonatomic) UIColor *colorForCellFill;
 @property (readonly, nonatomic) UIColor *colorForTitleLabel;
 @property (readonly, nonatomic) UIColor *colorForSubtitleLabel;
@@ -51,16 +52,25 @@
     CAShapeLayer *shapeLayer;
     UIImageView *imageView;
     FSCalendarEventIndicator *eventIndicator;
+
+     // 오늘 날짜 dot label
+    label = [[UILabel alloc] initWithFrame:CGRectZero];
+    label.textAlignment = NSTextAlignmentCenter;
+    label.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.contentView addSubview:label];
+    self.todayDotLabel = label;
     
     label = [[UILabel alloc] initWithFrame:CGRectZero];
     label.textAlignment = NSTextAlignmentCenter;
     label.textColor = [UIColor blackColor];
+    label.translatesAutoresizingMaskIntoConstraints = NO;    
     [self.contentView addSubview:label];
     self.titleLabel = label;
     
     label = [[UILabel alloc] initWithFrame:CGRectZero];
     label.textAlignment = NSTextAlignmentCenter;
     label.textColor = [UIColor lightGrayColor];
+    label.translatesAutoresizingMaskIntoConstraints = NO;   
     [self.contentView addSubview:label];
     self.subtitleLabel = label;
     
@@ -69,7 +79,7 @@
     shapeLayer.borderWidth = 1.0;
     shapeLayer.borderColor = [UIColor clearColor].CGColor;
     shapeLayer.opacity = 0;
-    [self.contentView.layer insertSublayer:shapeLayer below:_titleLabel.layer];
+    [self.contentView.layer insertSublayer:shapeLayer below:_todayDotLabel.layer];
     self.shapeLayer = shapeLayer;
     
     eventIndicator = [[FSCalendarEventIndicator alloc] initWithFrame:CGRectZero];
@@ -103,29 +113,28 @@
     }
     
     if (_subtitle) {
-        CGFloat titleHeight = self.titleLabel.font.lineHeight;
-        CGFloat subtitleHeight = self.subtitleLabel.font.lineHeight;
+
+        //.weak 버전일 때 
+
+        [_todayDotLabel.topAnchor constraintEqualToAnchor: self.topAnchor ].active = YES;
+        [_todayDotLabel.centerXAnchor constraintEqualToAnchor:self.centerXAnchor].active = YES;
         
-        CGFloat height = titleHeight + subtitleHeight;
-        _titleLabel.frame = CGRectMake(
-                                       self.preferredTitleOffset.x,
-                                       (self.contentView.fs_height*5.0/6.0-height)*0.5+self.preferredTitleOffset.y,
-                                       self.contentView.fs_width,
-                                       titleHeight
-                                       );
-        _subtitleLabel.frame = CGRectMake(
-                                          self.preferredSubtitleOffset.x,
-                                          (_titleLabel.fs_bottom-self.preferredTitleOffset.y) - (_titleLabel.fs_height-_titleLabel.font.pointSize)+self.preferredSubtitleOffset.y,
-                                          self.contentView.fs_width,
-                                          subtitleHeight
-                                          );
+        [_titleLabel.topAnchor constraintEqualToAnchor:self.todayDotLabel.bottomAnchor ].active = YES;
+        [_titleLabel.centerXAnchor constraintEqualToAnchor:self.centerXAnchor].active = YES;
+        
+        [_subtitleLabel.topAnchor constraintEqualToAnchor:self.titleLabel.bottomAnchor constant:20.0].active = YES;
+        [_subtitleLabel.centerXAnchor constraintEqualToAnchor:self.contentView.centerXAnchor].active = YES;
+    
     } else {
-        _titleLabel.frame = CGRectMake(
-                                       self.preferredTitleOffset.x,
-                                       self.preferredTitleOffset.y,
-                                       self.contentView.fs_width,
-                                       floor(self.contentView.fs_height*5.0/6.0)
-                                       );
+        // .month 버전일 때 
+
+        CGFloat todayHeight = self.todayDotLabel.font.lineHeight;
+        [_todayDotLabel.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:1.0].active = YES;
+        [_todayDotLabel.centerXAnchor constraintEqualToAnchor:self.contentView.centerXAnchor].active = YES;
+        
+        [_titleLabel.topAnchor constraintEqualToAnchor:self.todayDotLabel.bottomAnchor constant:2.0].active = YES;
+        [_titleLabel.centerXAnchor constraintEqualToAnchor:self.contentView.centerXAnchor].active = YES;
+        [_titleLabel.centerYAnchor constraintEqualToAnchor:self.contentView.centerYAnchor constant: -1.0].active = YES;
     }
     
     _imageView.frame = CGRectMake(self.preferredImageOffset.x, self.preferredImageOffset.y, self.contentView.fs_width, self.contentView.fs_height);
@@ -133,11 +142,29 @@
     CGFloat titleHeight = self.bounds.size.height*5.0/6.0;
     CGFloat diameter = MIN(self.bounds.size.height*5.0/6.0,self.bounds.size.width);
     diameter = diameter > FSCalendarStandardCellDiameter ? (diameter - (diameter-FSCalendarStandardCellDiameter)*0.5) : diameter;
-    _shapeLayer.frame = CGRectMake((self.bounds.size.width-diameter)/2,
-                                   (titleHeight-diameter)/2,
-                                   diameter,
-                                   diameter);
-    
+     // .month인 경우 border 사이즈 // 월간 캘린더 셀 중앙으로 
+    if (!_subtitle) {
+       _shapeLayer.frame = CGRectMake(5,
+                                       5,
+                                       self.bounds.size.width-8,
+                                       self.bounds.size.width-8);
+        // Calculate the center coordinates
+        CGFloat centerX = CGRectGetMidX(self.bounds);
+        CGFloat centerY = CGRectGetMidY(self.bounds);
+
+        // Calculate the new origin based on the center coordinates and the size of the shape layer
+        CGFloat newX = centerX - CGRectGetWidth(_shapeLayer.frame) / 2;
+        CGFloat newY = centerY - CGRectGetHeight(_shapeLayer.frame) / 2;
+
+        // Update the frame with the new origin
+        _shapeLayer.frame = CGRectMake(newX, newY, CGRectGetWidth(_shapeLayer.frame), CGRectGetHeight(_shapeLayer.frame));
+    } else {
+     // .week인 경우 border 사이즈
+        _shapeLayer.frame = CGRectMake(0,
+                                       +1,
+                                       self.bounds.size.width,
+                                       self.bounds.size.height);
+    }
     CGPathRef path = [UIBezierPath bezierPathWithRoundedRect:_shapeLayer.bounds
                                                 cornerRadius:CGRectGetWidth(_shapeLayer.bounds)*0.5*self.borderRadius].CGPath;
     if (!CGPathEqualToPath(_shapeLayer.path,path)) {
@@ -171,17 +198,17 @@
     _shapeLayer.opacity = 1;
         
     CAAnimationGroup *group = [CAAnimationGroup animation];
-    CABasicAnimation *zoomOut = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-    zoomOut.fromValue = @0.3;
-    zoomOut.toValue = @1.2;
-    zoomOut.duration = FSCalendarDefaultBounceAnimationDuration/4*3;
-    CABasicAnimation *zoomIn = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-    zoomIn.fromValue = @1.2;
-    zoomIn.toValue = @1.0;
-    zoomIn.beginTime = FSCalendarDefaultBounceAnimationDuration/4*3;
-    zoomIn.duration = FSCalendarDefaultBounceAnimationDuration/4;
-    group.duration = FSCalendarDefaultBounceAnimationDuration;
-    group.animations = @[zoomOut, zoomIn];
+    // CABasicAnimation *zoomOut = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+    // zoomOut.fromValue = @0.3;
+    // zoomOut.toValue = @1.2;
+    // zoomOut.duration = FSCalendarDefaultBounceAnimationDuration/4*3;
+    // CABasicAnimation *zoomIn = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+    // zoomIn.fromValue = @1.2;
+    // zoomIn.toValue = @1.0;
+    // zoomIn.beginTime = FSCalendarDefaultBounceAnimationDuration/4*3;
+    // zoomIn.duration = FSCalendarDefaultBounceAnimationDuration/4;
+    // group.duration = FSCalendarDefaultBounceAnimationDuration;
+    // group.animations = @[zoomOut, zoomIn];
     [_shapeLayer addAnimation:group forKey:@"bounce"];
     [self configureAppearance];
     
@@ -207,6 +234,17 @@
         titleFont = self.calendar.appearance.subtitleFont;
         if (![titleFont isEqual:_subtitleLabel.font]) {
             _subtitleLabel.font = titleFont;
+        }
+    }
+           // 오늘 날짜 dot label color, font 
+    if (_todayDotLabel) {
+        textColor = self.colorForTodayDotLabel;
+        if (![textColor isEqual:_todayDotLabel.textColor]) {
+            _todayDotLabel.textColor = textColor;
+        }
+        titleFont = self.calendar.appearance.todayTitleDotFont;
+        if (![titleFont isEqual:_todayDotLabel.font]) {
+            _todayDotLabel.font = titleFont;
         }
     }
     
@@ -280,6 +318,14 @@
         return self.preferredFillSelectionColor ?: [self colorForCurrentStateInDictionary:_appearance.backgroundColors];
     }
     return self.preferredFillDefaultColor ?: [self colorForCurrentStateInDictionary:_appearance.backgroundColors];
+}
+// 오늘 날짜 dot label color
+- (UIColor *)colorForTodayDotLabel
+{
+    if (self.selected) {
+        return self.preferredTitleDotSelectionColor ?: [self colorForCurrentStateInDictionary:_appearance.todayTitleDotColors];
+    }
+    return self.preferredTitleTodayDotDefaultColor ?: [self colorForCurrentStateInDictionary:_appearance.todayTitleDotColors];
 }
 
 - (UIColor *)colorForTitleLabel

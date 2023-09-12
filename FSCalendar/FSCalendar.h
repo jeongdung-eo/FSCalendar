@@ -63,6 +63,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @optional
 
+ // 오늘날짜 위  dot 
+- (nullable NSString *)calendar:(FSCalendar *)calendar todayTitleDotForDate:(NSDate *)date;
+
 /**
  * Asks the dataSource for a title for the specific date as a replacement of the day text
  */
@@ -158,6 +161,10 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol FSCalendarDelegateAppearance <FSCalendarDelegate>
 
 @optional
+
+// 오늘 날짜 위에 dot 표시 
+- (nullable UIColor *)calendar:(FSCalendar *)calendar appearance:(FSCalendarAppearance *)appearance todayTitleDotDefaultColorForDate:(NSDate *)date;
+- (nullable UIColor *)calendar:(FSCalendar *)calendar appearance:(FSCalendarAppearance *)appearance todayTitleDotSelectionColorForDate:(NSDate *)date;
 
 /**
  * Asks the delegate for a fill color in unselected state for the specific date.

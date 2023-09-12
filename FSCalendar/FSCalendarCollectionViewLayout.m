@@ -65,7 +65,6 @@
         self.sectionRowCounts = NULL;
         
         self.scrollDirection = UICollectionViewScrollDirectionHorizontal;
-        self.sectionInsets = UIEdgeInsetsMake(5, 0, 5, 0);
         
         self.itemAttributes = NSMutableDictionary.dictionary;
         self.headerAttributes = NSMutableDictionary.dictionary;
@@ -100,6 +99,8 @@
     if (CGSizeEqualToSize(self.collectionViewSize, self.collectionView.frame.size) && self.numberOfSections == self.collectionView.numberOfSections && self.separators == self.calendar.appearance.separators) {
         return;
     }
+     // 전체 collectionview section 여백
+    self.sectionInsets = self.calendar.transitionCoordinator.representingScope == FSCalendarScopeWeek ? UIEdgeInsetsMake(0, 0, 10, 0) : UIEdgeInsetsMake(10, 10, 10, 0); 
     self.collectionViewSize = self.collectionView.frame.size;
     self.separators = self.calendar.appearance.separators;
     

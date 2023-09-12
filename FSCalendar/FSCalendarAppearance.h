@@ -44,6 +44,9 @@ typedef NS_OPTIONS(NSUInteger, FSCalendarCaseOptions) {
  */
 @interface FSCalendarAppearance : NSObject
 
+ // 오늘 날짜 dot font
+@property (strong, nonatomic) UIFont   *todayTitleDotFont;
+
 /**
  * The font of the day text.
  */

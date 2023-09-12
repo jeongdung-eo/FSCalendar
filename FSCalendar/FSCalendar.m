@@ -311,7 +311,7 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
         _deliver.frame = CGRectMake(self.calendarHeaderView.fs_left, self.calendarHeaderView.fs_top, self.calendarHeaderView.fs_width, headerHeight+weekdayHeight);
         _deliver.hidden = self.calendarHeaderView.hidden;
         if (!self.floatingMode) {
-            switch (self.transitionCoordinator.representingScope) {
+         switch (self.transitionCoordinator.representingScope) {
                 case FSCalendarScopeMonth: {
                     CGFloat contentHeight = rowHeight*6 + padding*2;
                     _daysContainer.frame = CGRectMake(0, headerHeight+weekdayHeight, self.fs_width, contentHeight);
@@ -319,12 +319,14 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
                     break;
                 }
                 case FSCalendarScopeWeek: {
-                    CGFloat contentHeight = rowHeight + padding*2;
-                    _daysContainer.frame = CGRectMake(0, headerHeight+weekdayHeight, self.fs_width, contentHeight);
-                    _collectionView.frame = CGRectMake(0, 0, _daysContainer.fs_width, contentHeight);
+                   
+                //height size
+                _daysContainer.frame = CGRectMake(0, headerHeight+weekdayHeight, self.fs_width, self.bounds.size.height);
+                _collectionView.frame = CGRectMake(0, 0, _daysContainer.fs_width, self.bounds.size.height);
                     break;
                 }
             }
+
         } else {
             
             CGFloat contentHeight = _contentView.fs_height;
@@ -367,8 +369,7 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
                 return CGSizeMake(size.width, height);
             }
             case FSCalendarScopeWeek: {
-                CGFloat height = weekdayHeight + headerHeight + rowHeight + paddings;
-                return CGSizeMake(size.width, height);
+                return CGSizeMake(size.width, size.height);
             }
         }
     } else {
@@ -497,7 +498,7 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     FSCalendarMonthPosition monthPosition = [self.calculator monthPositionForIndexPath:indexPath];
-    if (self.placeholderType == FSCalendarPlaceholderTypeNone && monthPosition != FSCalendarMonthPositionCurrent) {
+    if (self.placeholderType == FSCalendarPlaceholderTypeFillHeadTail && FSCalendarPlaceholderTypeNone && monthPosition != FSCalendarMonthPositionCurrent) {
         return NO;
     }
     NSDate *date = [self.calculator dateForIndexPath:indexPath];
@@ -1375,6 +1376,12 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
         FSCalendarInvalidateCellAppearance(preferredSubtitleSelectionColor,subtitleSelectionColorForDate);
         FSCalendarInvalidateCellAppearanceWithDefault(preferredSubtitleOffset,subtitleOffsetForDate,CGPointInfinity);
     }
+         // 오늘 날짜 위에 dot 표시
+     if (cell.todayDotLabel) {
+        FSCalendarInvalidateCellAppearance(preferredTitleTodayDotDefaultColor,todayTitleDotDefaultColorForDate);
+        FSCalendarInvalidateCellAppearance(preferredTitleDotSelectionColor,todayTitleDotSelectionColorForDate);
+    }
+
     if (cell.numberOfEvents) {
         FSCalendarInvalidateCellAppearance(preferredEventDefaultColors,eventDefaultColorsForDate);
         FSCalendarInvalidateCellAppearance(preferredEventSelectionColors,eventSelectionColorsForDate);
@@ -1400,6 +1407,9 @@ typedef NS_ENUM(NSUInteger, FSCalendarOrientation) {
     cell.image = [self.dataSourceProxy calendar:self imageForDate:date];
     cell.numberOfEvents = [self.dataSourceProxy calendar:self numberOfEventsForDate:date];
     cell.titleLabel.text = [self.dataSourceProxy calendar:self titleForDate:date] ?: @([self.gregorian component:NSCalendarUnitDay fromDate:date]).stringValue;
+         // 오늘 날짜 위 dot 표시  
+    cell.todayDotLabel.text = self.today ? @"⦁" : @"⦁";
+    cell.todayDotLabel.font = [UIFont systemFontOfSize: 30];
     cell.subtitle  = [self.dataSourceProxy calendar:self subtitleForDate:date];
     cell.selected = [_selectedDates containsObject:date];
     cell.dateIsToday = self.today?[self.gregorian isDate:date inSameDayAsDate:self.today]:NO;

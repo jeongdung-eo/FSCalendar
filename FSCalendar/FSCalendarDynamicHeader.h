@@ -50,7 +50,8 @@
 @interface FSCalendarAppearance (Dynamic)
 
 @property (readwrite, nonatomic) FSCalendar *calendar;
-
+//오늘 날짜 dot color
+@property (readonly, nonatomic) NSDictionary *todayTitleDotColors;
 @property (readonly, nonatomic) NSDictionary *backgroundColors;
 @property (readonly, nonatomic) NSDictionary *titleColors;
 @property (readonly, nonatomic) NSDictionary *subtitleColors;

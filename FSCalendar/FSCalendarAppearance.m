@@ -15,11 +15,14 @@
 @interface FSCalendarAppearance ()
 
 @property (weak  , nonatomic) FSCalendar *calendar;
-
+// 오늘 날짜 dot color
+@property (strong, nonatomic) NSMutableDictionary *todayTitleDotColors;
 @property (strong, nonatomic) NSMutableDictionary *backgroundColors;
 @property (strong, nonatomic) NSMutableDictionary *titleColors;
 @property (strong, nonatomic) NSMutableDictionary *subtitleColors;
 @property (strong, nonatomic) NSMutableDictionary *borderColors;
+#define RGB(r, g, b) [UIColor colorWithRed:r/255.0 green:g/255.0 blue:b/255.0 alpha:1]
+
 
 @end
 
@@ -29,7 +32,8 @@
 {
     self = [super init];
     if (self) {
-        
+        // 오늘 날짜 dot font
+        _todayTitleDotFont = [UIFont systemFontOfSize:FSCalendarStandardTitleTextSize];
         _titleFont = [UIFont systemFontOfSize:FSCalendarStandardTitleTextSize];
         _subtitleFont = [UIFont systemFontOfSize:FSCalendarStandardSubtitleTextSize];
         _weekdayFont = [UIFont systemFontOfSize:FSCalendarStandardWeekdayTextSize];
@@ -52,18 +56,26 @@
         _backgroundColors[@(FSCalendarCellStateToday)]       = FSCalendarStandardTodayColor;
         
         _titleColors = [NSMutableDictionary dictionaryWithCapacity:5];
-        _titleColors[@(FSCalendarCellStateNormal)]      = [UIColor blackColor];
-        _titleColors[@(FSCalendarCellStateSelected)]    = [UIColor whiteColor];
+        _titleColors[@(FSCalendarCellStateNormal)]      = [UIColor whiteColor];
+        _titleColors[@(FSCalendarCellStateSelected)]    = [UIColor blackColor];
         _titleColors[@(FSCalendarCellStateDisabled)]    = [UIColor grayColor];
         _titleColors[@(FSCalendarCellStatePlaceholder)] = [UIColor lightGrayColor];
         _titleColors[@(FSCalendarCellStateToday)]       = [UIColor whiteColor];
         
         _subtitleColors = [NSMutableDictionary dictionaryWithCapacity:5];
-        _subtitleColors[@(FSCalendarCellStateNormal)]      = [UIColor darkGrayColor];
+        _subtitleColors[@(FSCalendarCellStateNormal)]      = [UIColor blackColor];
         _subtitleColors[@(FSCalendarCellStateSelected)]    = [UIColor whiteColor];
         _subtitleColors[@(FSCalendarCellStateDisabled)]    = [UIColor lightGrayColor];
         _subtitleColors[@(FSCalendarCellStatePlaceholder)] = [UIColor lightGrayColor];
         _subtitleColors[@(FSCalendarCellStateToday)]       = [UIColor whiteColor];
+        // 오늘 날짜 dot color
+        _todayTitleDotColors = [NSMutableDictionary dictionaryWithCapacity:5];
+        _todayTitleDotColors[@(FSCalendarCellStateNormal)]      = [UIColor clearColor];
+        _todayTitleDotColors[@(FSCalendarCellStateSelected)]    = [UIColor clearColor];
+        _todayTitleDotColors[@(FSCalendarCellStateDisabled)]    = [UIColor clearColor];
+        _todayTitleDotColors[@(FSCalendarCellStatePlaceholder)] = [UIColor clearColor];
+        _todayTitleDotColors[@(FSCalendarCellStateToday)]       = RGB(74, 229, 155);
+        _todayTitleDotColors[@(FSCalendarCellStateTodaySelected)] = RGB(74, 229, 155);
         
         _borderColors[@(FSCalendarCellStateSelected)] = [UIColor clearColor];
         _borderColors[@(FSCalendarCellStateNormal)] = [UIColor clearColor];
@@ -80,6 +92,14 @@
         
     }
     return self;
+}
+// 오늘 날짜 dot font
+- (void)setTodayTitleDotFont:(UIFont *)todayTitleDotFont
+{
+    if (![todayTitleDotFont isEqual:todayTitleDotFont]) {
+        _todayTitleDotFont = todayTitleDotFont;
+        [self.calendar configureAppearance];
+    }
 }
 
 - (void)setTitleFont:(UIFont *)titleFont
@@ -532,4 +552,3 @@
 }
 
 @end
-

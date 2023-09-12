@@ -16,6 +16,9 @@ typedef NS_ENUM(NSUInteger, FSCalendarMonthPosition);
 
 #pragma mark - Public properties
 
+// 오늘 날짜 dot label
+@property (weak, nonatomic) UILabel *todayDotLabel;
+
 /**
  The day text label of the cell
  */
@@ -62,6 +65,9 @@ typedef NS_ENUM(NSUInteger, FSCalendarMonthPosition);
 @property (assign, nonatomic) BOOL dateIsToday;
 @property (assign, nonatomic) BOOL weekend;
 
+//오늘 날짜 dot default , select color
+@property (strong, nonatomic) UIColor *preferredTitleTodayDotDefaultColor;
+@property (strong, nonatomic) UIColor *preferredTitleDotSelectionColor;
 @property (strong, nonatomic) UIColor *preferredFillDefaultColor;
 @property (strong, nonatomic) UIColor *preferredFillSelectionColor;
 @property (strong, nonatomic) UIColor *preferredTitleDefaultColor;
